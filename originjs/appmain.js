@@ -120,7 +120,8 @@ function main() {
                     }
                     break;
                 case 'big':
-                    if(d.name == "JACIN"){
+                switch(d.name){
+                    case 'JACIN':
                         setGamemode('jac');
                         bonusdata.jacgetcount = 4;
                         bonusdata.jacgamecount = 4;
@@ -128,12 +129,13 @@ function main() {
                         bonusflag = "none";
                         jacflag = false;
                         clearLamp()
-                    }
+                    break
                     case "リプレイ":
                     case "代替リプレイ":
                     case "リーチ目リプレイ":
                         replayflag = true;
                     break;
+                }
                 case 'reg':
                 case 'jac':
                     changeBonusSeg()
