@@ -40,7 +40,6 @@ function main() {
             })
         }
         if (gamemode == "big") {
-            bonusdata.bonusgame--;
             changeBonusSeg()
         }
 
@@ -75,28 +74,13 @@ function main() {
                             var currentBig = bgmData[sbig?'SBIG':'BIG'];
                             sounder.playSound(currentBig.tag, true, null, currentBig.loopStart)
                             bonusdata = {
-                                bonusget:240,
+                                bonusget:60,
                                 geted:0
                             }
                             bonusflag = "none";
                             changeBonusSeg()
                             clearLamp()
                             jacflag = false
-                            kokuti = false;
-                            kokutid = false;
-                            break;
-                        case "BAR":
-                            setGamemode('reg');
-                            sounder.stopSound("bgm");
-                            sounder.playSound("reg", true);
-                            bonusdata = {
-                                jacgetcount:8,
-                                jacgamecount:8,
-                                jaccount:0
-                            }
-                            changeBonusSeg();
-                            bonusflag = "none";
-                            clearLamp()
                             kokuti = false;
                             kokutid = false;
                             break;
@@ -136,6 +120,7 @@ function main() {
                         replayflag = true;
                     break;
                 }
+                break
                 case 'reg':
                 case 'jac':
                     changeBonusSeg()
@@ -186,20 +171,21 @@ function main() {
                 break
             }
         }
-        if ((gamemode == 'jac'||gamemode == 'reg')  && ( bonusdata.jacgamecount == 0 || bonusdata.jacgetcount == 0)) {
-            setGamemode('big')
-        }
-        if(gamemode != 'normal' && bonusdata.bonusget - bonusdata.geted < 0){
-            setGamemode('normal');
+        console.log(e)
+        if(gamemode != 'normal' && bonusdata.geted + e.pay >= bonusdata.bonusget){
             if(gamemode == 'jac'){
                 rt.mode = null;
                 rt.game = 250;
             }else{
                 rt.mode = 'リーチ目高確率';
             }
+            setGamemode('normal');
             sounder.stopSound("bgm")
             segments.effectseg.reset();
             slotmodule.once("payend", function() {})
+        }
+        if ((gamemode == 'jac'||gamemode == 'reg')  && ( bonusdata.jacgamecount == 0 || bonusdata.jacgetcount == 0)) {
+            setGamemode('big')
         }
         if (nexter) {
             e.stopend()
@@ -207,13 +193,19 @@ function main() {
     })
 
     slotmodule.on("payend", function() {
-        if (gamemode != "normal") {
-            if (bonusdata.geted >= bonusdata.bonusget) {
-                slotmodule.emit("bonusend");
-                setGamemode("normal")
-                sounder.stopSound('bgm')
-            }
-        }
+         // if (gamemode != "normal") {
+         //     if (bonusdata.geted >= bonusdata.bonusget) {
+         //        if(gamemode == 'jac'){
+         //            rt.mode = null;
+         //            rt.game = 250;
+         //        }else{
+         //            rt.mode = 'リーチ目高確率';
+         //        }
+         //         slotmodule.emit("bonusend");
+         //         setGamemode("normal")
+         //         sounder.stopSound('bgm')
+         //     }
+         // }
     })
     slotmodule.on("leveron", function() {
     })
@@ -624,14 +616,7 @@ function main() {
                 slotmodule.once("payend", function() {
                     slotmodule.setLotMode(1)
                 });
-                slotmodule.setMaxbet(3);
-                break;
-            case 'reg':
-                gamemode = 'reg';
-                slotmodule.once("payend", function() {
-                    slotmodule.setLotMode(2)
-                });
-                slotmodule.setMaxbet(1);
+                slotmodule.setMaxbet(2);
                 break;
             case 'jac':
                 gamemode = 'jac';
