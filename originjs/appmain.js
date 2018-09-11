@@ -58,11 +58,10 @@ function main() {
                     switch (d.name) {
                         case "赤7":
                         case "青7":
-                            sbig = bonusflag == 'BIG2';
                             var bgmData = {
                                 "BIG": {
                                     tag: "BIG1",
-                                    loopStart: 0.582
+                                    loopStart: 1.156
                                 },
                                 "SBIG": {
                                     tag: "SBIG",
@@ -72,9 +71,9 @@ function main() {
                             sounder.stopSound("bgm");
                             setGamemode('big');
                             var currentBig = bgmData[sbig?'SBIG':'BIG'];
-                            sounder.playSound(currentBig.tag, true, null, currentBig.loopStart)
+                            sounder.playSound('BIG1', true, null, 1.156)
                             bonusdata = {
-                                bonusget:60,
+                                bonusget:240,
                                 geted:0
                             }
                             bonusflag = "none";
@@ -133,12 +132,14 @@ function main() {
                 case 'リーチ目高確率':
                     if(/3択子役/.test(lastControl)){
                         if(e.pay == 0){
+                            sounder.stopSound('bgm')
                             rt.mode = null;
                             rt.game = 250;
                         }
                     }
                     if(/リーチ目リプレイ/.test(lastControl)){
                         rt.mode = 'BAR揃え待機';
+                        sounder.stopSound('bgm')
                         segments.effectseg.setSegments("333");
                         sounder.playSound('kokuti')
                     }
@@ -146,6 +147,7 @@ function main() {
                 case 'BAR揃え待機':
                     if(/3択子役/.test(lastControl)){
                         if(e.pay == 0){
+                            sounder.stopSound('bgm')
                             rt.mode = null;
                             rt.game = 250;
                         }
@@ -153,11 +155,14 @@ function main() {
                     if(/RT突入リプレイ/.test(lastControl)){
                         rt.mode = 'リプレイ高確率';
                         rt.game = 50;
+                        sounder.playSound('RT2',true);
                     }
                 break
                 case 'リプレイ高確率':
                     if(rt.game == 0){
                         rt.mode = 'リーチ目高確率';
+                        sounder.stopSound('bgm')
+                        sounder.playSound('RT1',true);
                     }else{
                         rt.game--;
                     }
@@ -165,6 +170,7 @@ function main() {
                 default:
                     if(rt.game == 0){
                         rt.mode = 'リーチ目高確率';
+                        sounder.playSound('RT1',true);
                     }else{
                         rt.game--;
                     }
@@ -182,7 +188,9 @@ function main() {
             setGamemode('normal');
             sounder.stopSound("bgm")
             segments.effectseg.reset();
-            slotmodule.once("payend", function() {})
+            slotmodule.once("payend", function() {
+                if(rt.mode) sounder.playSound('RT1',true);
+            })
         }
         if ((gamemode == 'jac'||gamemode == 'reg')  && ( bonusdata.jacgamecount == 0 || bonusdata.jacgetcount == 0)) {
             setGamemode('big')
@@ -192,23 +200,6 @@ function main() {
         }
     })
 
-    slotmodule.on("payend", function() {
-         // if (gamemode != "normal") {
-         //     if (bonusdata.geted >= bonusdata.bonusget) {
-         //        if(gamemode == 'jac'){
-         //            rt.mode = null;
-         //            rt.game = 250;
-         //        }else{
-         //            rt.mode = 'リーチ目高確率';
-         //        }
-         //         slotmodule.emit("bonusend");
-         //         setGamemode("normal")
-         //         sounder.stopSound('bgm')
-         //     }
-         // }
-    })
-    slotmodule.on("leveron", function() {
-    })
 
     slotmodule.on("bet", function(e) {
         sounder.playSound("3bet")
@@ -390,7 +381,6 @@ function main() {
         }
         effect(ret,lot);
         lastControl = ret;
-        console.log(ret,rt)
         return ret;
     })
 
@@ -465,8 +455,8 @@ function main() {
     sounder.addFile("sound/pay.wav", "pay").addTag("se");
     sounder.addFile("sound/replay.wav", "replay").addTag("se");
     sounder.addFile("sound/BIG1.mp3", "BIG1").addTag("bgm")
-    sounder.addFile("sound/SBIG.mp3", "SBIG").addTag("bgm")
-    sounder.addFile("sound/reg1.mp3", "reg").addTag("bgm");
+    sounder.addFile("sound/rt1.mp3", "RT1").addTag("bgm")
+    sounder.addFile("sound/rt2.mp3", "RT2").addTag("bgm");
     sounder.addFile("sound/title.wav",'title').addTag("se");
     sounder.addFile("sound/type.mp3",'type').addTag("se");
     sounder.addFile("sound/yokoku.wav",'yokoku').addTag("se");
@@ -782,6 +772,24 @@ function main() {
                 if(orig == 'ベル'){
                     atEffect(lot);
                     sounder.playSound('yokoku')
+                }
+                if(orig == 'リプレイ'){
+                    var f;
+                    function timer(){
+                        if(f) return;
+                        setTimeout(()=>{
+                            $('.nabi').addClass('on');
+                        },250)
+                        setTimeout(()=>{
+                            $('.nabi').removeClass('on');
+                            timer();
+                        },500)
+                    }
+                    timer();
+                    slotmodule.once('allreelstop',()=>{
+                        f = true;
+                        $('.nabi').removeClass('on');
+                    })
                 }
                 break
             case 'リプレイ高確率':
