@@ -135,6 +135,7 @@ function main() {
                             sounder.stopSound('bgm')
                             rt.mode = null;
                             rt.game = 250;
+                            segments.effectseg.setSegments('');
                         }
                     }
                     if(/リーチ目リプレイ/.test(lastControl)){
@@ -150,6 +151,7 @@ function main() {
                             sounder.stopSound('bgm')
                             rt.mode = null;
                             rt.game = 250;
+                            segments.effectseg.setSegments('');
                         }
                     }
                     if(/RT突入リプレイ/.test(lastControl)){
@@ -740,6 +742,7 @@ function main() {
         }
         switch(rt.mode){
             case 'リーチ目高確率':
+                segments.effectseg.setSegments('C2');
                 if(orig == 'ベル'){
                     sounder.playSound('yokoku')
                     var idx = 0;
